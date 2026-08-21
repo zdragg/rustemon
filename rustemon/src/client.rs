@@ -1,16 +1,25 @@
 //! Defines the client used to access Pokeapi.
 
+#[cfg(feature = "cache")]
 use http_cache_reqwest::{Cache, CacheManager, HttpCache, HttpCacheOptions};
 use reqwest::{Client, IntoUrl, Url};
+#[cfg(feature = "cache")]
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use serde::de::DeserializeOwned;
 
 use crate::error::Error;
 
 // Reexport to ease overloading.
+#[cfg(feature = "cache")]
 pub use http_cache_reqwest::{CacheMode, CacheOptions};
 
+#[cfg(feature = "cache")]
 pub use http_cache_reqwest::{CACacheManager, MokaManager};
+
+#[cfg(feature = "cache")]
+type HttpClient = ClientWithMiddleware;
+#[cfg(not(feature = "cache"))]
+type HttpClient = Client;
 
 /// Environment to target while calling `PokeApi`.
 #[derive(Clone, Default)]
@@ -43,11 +52,20 @@ impl TryFrom<Environment> for Url {
 }
 
 /// Builder used to ease the configuration of `RustemonClient`.
-pub struct RustemonClientBuilder<T: CacheManager> {
+#[cfg(feature = "cache")]
+pub struct RustemonClientBuilder<T: CacheManager = CACacheManager> {
     cache: HttpCache<T>,
     environment: Environment,
 }
 
+/// Builder used to ease the configuration of `RustemonClient`.
+#[cfg(not(feature = "cache"))]
+#[derive(Default)]
+pub struct RustemonClientBuilder {
+    environment: Environment,
+}
+
+#[cfg(feature = "cache")]
 impl Default for RustemonClientBuilder<CACacheManager> {
     fn default() -> Self {
         let manager = CACacheManager::new("./rustemon-cache".into(), false);
@@ -62,6 +80,7 @@ impl Default for RustemonClientBuilder<CACacheManager> {
     }
 }
 
+#[cfg(feature = "cache")]
 impl Default for RustemonClientBuilder<MokaManager> {
     fn default() -> Self {
         Self {
@@ -75,6 +94,7 @@ impl Default for RustemonClientBuilder<MokaManager> {
     }
 }
 
+#[cfg(feature = "cache")]
 impl<T: CacheManager> RustemonClientBuilder<T> {
     /// Configure the `CacheMode` of the builder. See [`CacheMode`].
     pub const fn with_mode(mut self, cache_mode: CacheMode) -> Self {
@@ -111,10 +131,27 @@ impl<T: CacheManager> RustemonClientBuilder<T> {
     }
 }
 
+#[cfg(not(feature = "cache"))]
+impl RustemonClientBuilder {
+    /// Configure the environment of the builder. See [Environment].
+    pub fn with_environment(mut self, environment: Environment) -> Self {
+        self.environment = environment;
+        self
+    }
+
+    /// Consumes the builder in order to create a [`RustemonClient`].
+    pub fn try_build(self) -> Result<RustemonClient, Error> {
+        Ok(RustemonClient {
+            client: Client::new(),
+            base: Url::try_from(self.environment)?,
+        })
+    }
+}
+
 /// Custom client used to call Pokeapi.
 #[derive(Debug)]
 pub struct RustemonClient {
-    client: ClientWithMiddleware,
+    client: HttpClient,
     base: Url,
 }
 
@@ -195,16 +232,24 @@ impl RustemonClient {
 impl Default for RustemonClient {
     /// Returns a `RustemonClient` with default configuration.
     fn default() -> Self {
-        let manager = CACacheManager::new("./rustemon-cache".into(), false);
+        #[cfg(feature = "cache")]
+        let client = {
+            let manager = CACacheManager::new("./rustemon-cache".into(), false);
 
-        Self {
-            client: ClientBuilder::new(Client::new())
+            ClientBuilder::new(Client::new())
                 .with(Cache(HttpCache {
                     mode: CacheMode::Default,
                     manager,
                     options: HttpCacheOptions::default(),
                 }))
-                .build(),
+                .build()
+        };
+
+        #[cfg(not(feature = "cache"))]
+        let client = Client::new();
+
+        Self {
+            client,
             base: Url::try_from(Environment::default()).unwrap(),
         }
     }

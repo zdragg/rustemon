@@ -33,6 +33,12 @@ rustemon = { version = "*", features = ["serialize"] }
 
 You can also use the `static-resources` feature, that allow you to easily instanciate models using data statically pulled from the PokeAPI.
 
+The `cache` feature enables caching, and is enabled by default. You can disable it with `default-features = false`:
+
+```toml
+rustemon = { version = "4.6.0", default-features = false }
+```
+
 ##### Models
 
 All the models are located into the following module :
@@ -69,7 +75,7 @@ the library to work.
 ### Caching
 
 All calls to the API are cached by a middleware attached to the [`RustemonClient`](/src/client.rs) you need to instanciate in order
-to make calls to the `PokeAPI`.
+to make calls to the `PokeAPI`. To disable caching, see the Features section above.
 
 ### Examples
 
