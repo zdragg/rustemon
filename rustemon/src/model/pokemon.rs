@@ -432,6 +432,8 @@ pub struct OtherSprites {
     /// The official artwork of this Pokémon.
     #[serde(rename = "official-artwork")]
     pub official_artwork: OfficialArtworkSprites,
+    /// Showdown sprites of this Pokémon.
+    pub showdown: ShowdownSprites,
 }
 
 /// References the dream world sprites of a Pokémon.
@@ -464,6 +466,28 @@ pub struct HomeSprites {
 pub struct OfficialArtworkSprites {
     /// The default despiction of this Pokémon form the official artwork.
     pub front_default: Option<String>,
+}
+
+/// References Showdown sprites of a Pokémon.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Deserialize)]
+#[cfg_attr(feature = "serialize", derive(serde::Serialize))]
+pub struct ShowdownSprites {
+    /// The default back sprite of a Pokémon, from Showdown.
+    pub back_default: Option<String>,
+    /// The female back sprite of a Pokémon, from Showdown.
+    pub back_female: Option<String>,
+    /// The shiny back sprite of a Pokémon, from Showdown.
+    pub back_shiny: Option<String>,
+    /// The female shiny back sprite of a Pokémon, from Showdown.
+    pub back_shiny_female: Option<String>,
+    /// The default front sprite of a Pokémon, from Showdown.
+    pub front_default: Option<String>,
+    /// The female front sprite of a Pokémon, from Showdown.
+    pub front_female: Option<String>,
+    /// The shiny front sprite of a Pokémon, from Showdown.
+    pub front_shiny: Option<String>,
+    /// The female shiny front sprite of a Pokémon, from Showdown.
+    pub front_shiny_female: Option<String>,
 }
 
 /// Sprites of a Pokémon, per generation.
