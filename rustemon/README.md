@@ -1,3 +1,5 @@
+# This version has been modified by me for my own convenience to use in [RotomDex](https://github.com/zdragg/rotomdex)
+
 # Rustemon [![Latest Version]][crates.io]
 
 [Latest Version]: https://img.shields.io/crates/v/rustemon.svg

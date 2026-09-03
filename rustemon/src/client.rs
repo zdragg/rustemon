@@ -3,11 +3,8 @@
 #[cfg(feature = "cache")]
 use http_cache_reqwest::{Cache, CacheManager, HttpCache, HttpCacheOptions};
 use reqwest::{Client, IntoUrl, Url};
-#[cfg(not(feature = "cache"))]
 use reqwest_middleware::ClientBuilder;
 use reqwest_middleware::ClientWithMiddleware;
-#[cfg(feature = "cache")]
-use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use serde::de::DeserializeOwned;
 
 use crate::error::Error;
