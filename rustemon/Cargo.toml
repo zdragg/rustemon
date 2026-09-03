@@ -29,7 +29,6 @@ name = "custom_in_memory_client"
 required-features = ["cache"]
 
 [dependencies]
-http-cache-reqwest = { version = "0.16.0", features = ["manager-moka"], optional = true }
 reqwest = { version = "0.12.28", default-features = false, features = [
   "json",
   "rustls-tls-native-roots"
@@ -43,7 +42,9 @@ thiserror = "2.0.19"
 tokio = { version = "1", features = ["full"] }
 toml = "0.9.8"
 
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+http-cache-reqwest = { version = "0.16.0", features = ["manager-moka"] }
+
 [features]
-cache = ["dep:http-cache-reqwest"]
 serialize = []
 static-resources = ["dep:serde_json"]

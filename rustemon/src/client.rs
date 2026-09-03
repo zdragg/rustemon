@@ -1,19 +1,20 @@
 //! Defines the client used to access Pokeapi.
 
-#[cfg(feature = "cache")]
-use http_cache_reqwest::{Cache, CacheManager, HttpCache, HttpCacheOptions};
 use reqwest::{Client, IntoUrl, Url};
 use reqwest_middleware::ClientBuilder;
 use reqwest_middleware::ClientWithMiddleware;
 use serde::de::DeserializeOwned;
 
+#[cfg(not(target_arch = "wasm32"))]
+use http_cache_reqwest::{Cache, HttpCache, HttpCacheOptions};
+
 use crate::error::Error;
 
 // Reexport to ease overloading.
-#[cfg(feature = "cache")]
+#[cfg(not(target_arch = "wasm32"))]
 pub use http_cache_reqwest::{CacheMode, CacheOptions};
 
-#[cfg(feature = "cache")]
+#[cfg(not(target_arch = "wasm32"))]
 pub use http_cache_reqwest::{CACacheManager, MokaManager};
 
 /// Environment to target while calling `PokeApi`.
@@ -132,7 +133,7 @@ impl RustemonClient {
 impl Default for RustemonClient {
     /// Returns a `RustemonClient` with default configuration.
     fn default() -> Self {
-        #[cfg(feature = "cache")]
+        #[cfg(not(target_arch = "wasm32"))]
         let client = {
             let manager = CACacheManager::new("./rustemon-cache".into(), false);
 
@@ -145,7 +146,7 @@ impl Default for RustemonClient {
                 .build()
         };
 
-        #[cfg(not(feature = "cache"))]
+        #[cfg(target_arch = "wasm32")]
         let client = ClientBuilder::new(Client::new()).build();
 
         Self {

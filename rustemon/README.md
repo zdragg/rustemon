@@ -1,4 +1,5 @@
 # This version has been modified by me for my own convenience to use in [RotomDex](https://github.com/zdragg/rotomdex)
+This version auto disables cache if on wasm32
 
 # Rustemon [![Latest Version]][crates.io]
 
