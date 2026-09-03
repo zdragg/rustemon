@@ -151,8 +151,10 @@ impl RustemonClientBuilder {
 /// Custom client used to call Pokeapi.
 #[derive(Debug)]
 pub struct RustemonClient {
-    client: HttpClient,
-    base: Url,
+    /// Inner client.
+    pub client: HttpClient,
+    /// Base URL for the API
+    pub base: Url,
 }
 
 /// Inner representation of an endpoint's id. Used to ease the api calls.
