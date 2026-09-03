@@ -9,7 +9,6 @@ pub enum Error {
     #[error(transparent)]
     Reqwest(#[from] reqwest::Error),
     /// Error coming from `reqwest_middleware`.
-    #[cfg(feature = "cache")]
     #[error(transparent)]
     ReqwestMiddleware(#[from] reqwest_middleware::Error),
     /// Error raised when an Url can't be parsed.

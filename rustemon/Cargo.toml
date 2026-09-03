@@ -1,34 +1,16 @@
 [package]
+name = "rustemon"
+version.workspace = true
 authors.workspace = true
+edition.workspace = true
 description.workspace = true
 documentation.workspace = true
-edition.workspace = true
-homepage.workspace = true
-keywords.workspace = true
-license.workspace = true
-name = "rustemon"
-publish = true
 readme.workspace = true
+homepage.workspace = true
 repository.workspace = true
-version.workspace = true
-
-[features]
-default = ["cache"]
-serialize = []
-static-resources = ["dep:serde_json"]
-cache = ["dep:http-cache-reqwest", "dep:reqwest-middleware"]
-
-[dependencies]
-http-cache-reqwest = { version = "0.16.0", features = ["manager-moka"], optional = true }
-reqwest = { version = "0.12.28", default-features = false, features = ["json", "rustls-tls-native-roots"] }
-reqwest-middleware = { version = "0.4.2", optional = true }
-serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true, optional = true }
-thiserror = "2.0.19"
-
-[dev-dependencies]
-tokio = { version = "1", features = ["full"] }
-toml = "0.9.8"
+license.workspace = true
+keywords.workspace = true
+publish = true
 
 [[example]]
 name = "toml_serialize"
@@ -45,3 +27,23 @@ required-features = ["cache"]
 [[example]]
 name = "custom_in_memory_client"
 required-features = ["cache"]
+
+[dependencies]
+http-cache-reqwest = { version = "0.16.0", features = ["manager-moka"], optional = true }
+reqwest = { version = "0.12.28", default-features = false, features = [
+  "json",
+  "rustls-tls-native-roots"
+] }
+reqwest-middleware = "0.4.2"
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true, optional = true }
+thiserror = "2.0.19"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["full"] }
+toml = "0.9.8"
+
+[features]
+cache = ["dep:http-cache-reqwest"]
+serialize = []
+static-resources = ["dep:serde_json"]

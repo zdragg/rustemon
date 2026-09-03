@@ -3,6 +3,9 @@
 #[cfg(feature = "cache")]
 use http_cache_reqwest::{Cache, CacheManager, HttpCache, HttpCacheOptions};
 use reqwest::{Client, IntoUrl, Url};
+#[cfg(not(feature = "cache"))]
+use reqwest_middleware::ClientBuilder;
+use reqwest_middleware::ClientWithMiddleware;
 #[cfg(feature = "cache")]
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use serde::de::DeserializeOwned;
@@ -15,11 +18,6 @@ pub use http_cache_reqwest::{CacheMode, CacheOptions};
 
 #[cfg(feature = "cache")]
 pub use http_cache_reqwest::{CACacheManager, MokaManager};
-
-#[cfg(feature = "cache")]
-type HttpClient = ClientWithMiddleware;
-#[cfg(not(feature = "cache"))]
-type HttpClient = Client;
 
 /// Environment to target while calling `PokeApi`.
 #[derive(Clone, Default)]
@@ -51,108 +49,11 @@ impl TryFrom<Environment> for Url {
     }
 }
 
-/// Builder used to ease the configuration of `RustemonClient`.
-#[cfg(feature = "cache")]
-pub struct RustemonClientBuilder<T: CacheManager = CACacheManager> {
-    cache: HttpCache<T>,
-    environment: Environment,
-}
-
-/// Builder used to ease the configuration of `RustemonClient`.
-#[cfg(not(feature = "cache"))]
-#[derive(Default)]
-pub struct RustemonClientBuilder {
-    environment: Environment,
-}
-
-#[cfg(feature = "cache")]
-impl Default for RustemonClientBuilder<CACacheManager> {
-    fn default() -> Self {
-        let manager = CACacheManager::new("./rustemon-cache".into(), false);
-        Self {
-            cache: HttpCache {
-                mode: CacheMode::Default,
-                manager,
-                options: HttpCacheOptions::default(),
-            },
-            environment: Environment::default(),
-        }
-    }
-}
-
-#[cfg(feature = "cache")]
-impl Default for RustemonClientBuilder<MokaManager> {
-    fn default() -> Self {
-        Self {
-            cache: HttpCache {
-                mode: CacheMode::Default,
-                manager: MokaManager::default(),
-                options: HttpCacheOptions::default(),
-            },
-            environment: Environment::default(),
-        }
-    }
-}
-
-#[cfg(feature = "cache")]
-impl<T: CacheManager> RustemonClientBuilder<T> {
-    /// Configure the `CacheMode` of the builder. See [`CacheMode`].
-    pub const fn with_mode(mut self, cache_mode: CacheMode) -> Self {
-        self.cache.mode = cache_mode;
-        self
-    }
-
-    /// Configure the manager of the builder. See [`CacheManager`].
-    pub fn with_manager(mut self, manager: T) -> Self {
-        self.cache.manager = manager;
-        self
-    }
-
-    /// Configure the cache options of the builder. See [`CacheOptions`].
-    pub const fn with_options(mut self, options: CacheOptions) -> Self {
-        self.cache.options.cache_options = Some(options);
-        self
-    }
-
-    /// Configure the environment of the builder. See [Environment].
-    pub fn with_environment(mut self, environment: Environment) -> Self {
-        self.environment = environment;
-        self
-    }
-
-    /// Consumes the builder in order to create a [`RustemonClient`].
-    pub fn try_build(self) -> Result<RustemonClient, Error> {
-        Ok(RustemonClient {
-            client: ClientBuilder::new(Client::new())
-                .with(Cache(self.cache))
-                .build(),
-            base: Url::try_from(self.environment)?,
-        })
-    }
-}
-
-#[cfg(not(feature = "cache"))]
-impl RustemonClientBuilder {
-    /// Configure the environment of the builder. See [Environment].
-    pub fn with_environment(mut self, environment: Environment) -> Self {
-        self.environment = environment;
-        self
-    }
-
-    /// Consumes the builder in order to create a [`RustemonClient`].
-    pub fn try_build(self) -> Result<RustemonClient, Error> {
-        Ok(RustemonClient {
-            client: Client::new(),
-            base: Url::try_from(self.environment)?,
-        })
-    }
-}
-
 /// Custom client used to call Pokeapi.
 #[derive(Debug)]
 pub struct RustemonClient {
     /// Inner client.
-    pub client: HttpClient,
+    pub client: ClientWithMiddleware,
     /// Base URL for the API
     pub base: Url,
 }
@@ -248,7 +149,7 @@ impl Default for RustemonClient {
         };
 
         #[cfg(not(feature = "cache"))]
-        let client = Client::new();
+        let client = ClientBuilder::new(Client::new()).build();
 
         Self {
             client,
