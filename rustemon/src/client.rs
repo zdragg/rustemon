@@ -122,11 +122,16 @@ impl RustemonClient {
     }
 
     /// Make a call through the client from a given [`IntoUrl`].
-    pub(crate) async fn get_by_url<T>(&self, url: impl IntoUrl) -> Result<T, Error>
+    pub(crate) async fn get_by_url<T>(&self, url: impl AsRef<str>) -> Result<T, Error>
     where
         T: DeserializeOwned,
     {
-        self.inner_get(url.into_url()?).await
+        let url = self
+            .base
+            .join(url.as_ref())
+            .map_err(|_| Error::UrlParse(url.as_ref().to_owned()))?;
+
+        self.inner_get(url).await
     }
 }
 
