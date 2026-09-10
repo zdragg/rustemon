@@ -15,7 +15,7 @@ use crate::error::Error;
 pub use http_cache_reqwest::{CacheMode, CacheOptions};
 
 #[cfg(not(target_arch = "wasm32"))]
-pub use http_cache_reqwest::{CACacheManager, MokaManager};
+pub use http_cache_reqwest::CACacheManager;
 
 /// Environment to target while calling `PokeApi`.
 #[derive(Clone, Default)]
