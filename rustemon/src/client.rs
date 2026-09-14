@@ -1,6 +1,7 @@
 //! Defines the client used to access Pokeapi.
 
-use reqwest::{Client, IntoUrl, Url};
+use reqwest::StatusCode;
+use reqwest::{Client, Url};
 use reqwest_middleware::ClientBuilder;
 use reqwest_middleware::ClientWithMiddleware;
 use serde::de::DeserializeOwned;
@@ -68,7 +69,11 @@ impl RustemonClient {
     where
         T: DeserializeOwned,
     {
-        Ok(self.client.get(url).send().await?.json().await?)
+        let resp = self.client.get(url).send().await?;
+        if resp.status() == StatusCode::NOT_FOUND {
+            return Err(Error::NotFound);
+        }
+        Ok(resp.json().await?)
     }
 
     /// Make a call through the client to the given `endpoint`.

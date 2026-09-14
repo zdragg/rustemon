@@ -21,4 +21,7 @@ pub enum Error {
     /// Error coming from trying to follow an instance with no URL.
     #[error("error while following empty url")]
     FollowEmptyURL,
+    /// Error coming from endpoint returning not found
+    #[error("resource not found")]
+    NotFound,
 }
